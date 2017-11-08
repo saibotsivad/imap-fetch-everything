@@ -33,15 +33,11 @@ module.exports = ({ imap }) => {
 				})
 
 				stream.once('end', () => {
-					const data = {
-						message: {
-							body,
-							attributes,
-							box
-						},
-						generatedId: shortid.generate()
-					}
-					emitter.emit('message', data)
+					emitter.emit('message', {
+						body,
+						attributes,
+						box
+					})
 				})
 			})
 
