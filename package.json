@@ -1,0 +1,30 @@
+{
+  "name": "imap-fetch-everything",
+  "version": "1.0.0",
+  "description": "Scan an entire IMAP account and emit for every message found.",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saibotsivad/imap-fetch-everything.git"
+  },
+  "keywords": [
+    "imap"
+  ],
+  "author": "saibotsivad",
+  "license": "VOL",
+  "bugs": {
+    "url": "https://github.com/saibotsivad/imap-fetch-everything/issues"
+  },
+  "homepage": "https://github.com/saibotsivad/imap-fetch-everything#readme",
+  "devDependencies": {
+    "proxyquire": "^1.8.0",
+    "tape": "^4.8.0"
+  },
+  "dependencies": {
+    "imap-box-names": "^1.0.1",
+    "imap-scan-many-boxes": "^1.0.1"
+  }
+}
