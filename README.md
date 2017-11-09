@@ -78,6 +78,12 @@ have already emitted the `ready` event.
 
 The returned emitter will emit the following events:
 
+#### `opened` *(object)*
+
+When a box is opened, the box object will be emitted. This is
+simply the object emitted from the module
+[imap-scan-many-boxes](https://www.npmjs.com/package/imap-scan-many-boxes).
+
 #### `error` *(object)*
 
 Each error object emitted has the following properties:

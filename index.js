@@ -22,6 +22,8 @@ module.exports = ({ imap }) => {
 		} else {
 			const scanner = scanManyBoxes({ imap, boxes, fetch })
 
+			scanner.on('opened', box => emitter.emit('opened', box))
+
 			scanner.on('message', ({ stream, box, sequenceNumber }) => {
 				const message = new EventEmitter()
 
