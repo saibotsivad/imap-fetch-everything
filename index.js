@@ -1,10 +1,10 @@
 const EventEmitter = require('events')
 const boxNames = require('imap-box-names')
-const scanBoxes = require('imap-scan-many-boxes')
+const scanManyBoxes = require('imap-scan-many-boxes')
 
 const fetch = {
 	bodies: '', // include full message
-	struct: true
+	struct: true // include extra metadata
 }
 
 module.exports = ({ imap }) => {
@@ -12,33 +12,33 @@ module.exports = ({ imap }) => {
 
 	boxNames(imap, (error, boxes) => {
 		if (error) {
-			emitter.emit('error', {
-				action: 'boxNames',
-				error
+			setImmediate(() => {
+				emitter.emit('error', {
+					action: 'boxNames',
+					error
+				})
+				emitter.emit('end')
 			})
-
 		} else {
-			const scanner = scanBoxes({ imap, boxes, fetch })
+			const scanner = scanManyBoxes({ imap, boxes, fetch })
 
-			scanner.on('message', ({ stream, box }) => {
-				let body = ''
-				let attributes
+			scanner.on('message', ({ stream, box, sequenceNumber }) => {
+				const message = new EventEmitter()
 
-				stream.on('body', (bodyStream, info) => {
-					bodyStream.on('data', chunk => body += chunk.toString('utf8'))
+				stream.on('body', (body, info) => {
+					message.emit('info', info)
+					message.emit('body', body)
 				})
 
-				stream.once('attributes', data => {
-					attributes = data
+				stream.once('attributes', attributes => {
+					message.emit('attributes', attributes)
 				})
 
 				stream.once('end', () => {
-					emitter.emit('message', {
-						body,
-						attributes,
-						box
-					})
+					message.emit('end')
 				})
+
+				emitter.emit('message', { message, box, sequenceNumber })
 			})
 
 			scanner.on('error', ({ action, error, box }) => {
