@@ -24,7 +24,7 @@
     "tape": "^4.8.0"
   },
   "dependencies": {
-    "imap-box-names": "^1.0.1",
+    "imap-box-names": "^2.0.0",
     "imap-scan-many-boxes": "^1.0.1"
   }
 }

@@ -10,16 +10,8 @@ const fetch = {
 module.exports = ({ imap }) => {
 	const emitter = new EventEmitter()
 
-	boxNames(imap, (error, boxes) => {
-		if (error) {
-			setImmediate(() => {
-				emitter.emit('error', {
-					action: 'boxNames',
-					error
-				})
-				emitter.emit('end')
-			})
-		} else {
+	boxNames(imap)
+		.then(boxes => {
 			const scanner = scanManyBoxes({ imap, boxes, fetch })
 
 			scanner.on('opened', box => emitter.emit('opened', box))
@@ -54,8 +46,14 @@ module.exports = ({ imap }) => {
 			scanner.on('end', () => {
 				emitter.emit('end')
 			})
-		}
-	})
+		})
+		.catch(error => {
+			emitter.emit('error', {
+				action: 'boxNames',
+				error
+			})
+			emitter.emit('end')
+		})
 
 	return emitter
 }

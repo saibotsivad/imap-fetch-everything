@@ -8,9 +8,9 @@ test('when there is an error getting the list of boxes', t => {
 	const error = { a: 'b' }
 
 	const fetchEverything = proxyquire('./index', {
-		'imap-box-names': (imap, callable) => {
+		'imap-box-names': imap => {
 			t.equal(mockImap, imap, 'the imap object is untouched')
-			callable(error)
+			return Promise.reject(error)
 		},
 		'imap-scan-many-boxes': () => {
 			t.fail('an earlier error should prevent scanning')
@@ -37,7 +37,7 @@ test('if the scanner emits an error more messages are still handled', t => {
 
 	const fetchEverything = proxyquire('./index', {
 		'imap-box-names': (ignore, callable) => {
-			callable(false, [ 'INBOX', 'INBOX.stuff' ])
+			return Promise.resolve([ 'INBOX', 'INBOX.stuff' ])
 		},
 		'imap-scan-many-boxes': ({ imap, boxes, fetch }) => {
 			t.equal(imap, mockImap, 'the imap object is untouched')
@@ -83,29 +83,31 @@ test('if the scanner emits an error more messages are still handled', t => {
 
 	// the stuff below here is essentially a mock of `imap-scan-many-boxes`
 
-	scannerEmitter.emit('error', {
-		action: 'scanAction',
-		error: 'oh no',
-		box: 'INBOX.stuff'
-	})
-
 	setImmediate(() => {
-		const stream = new EventEmitter()
-		scannerEmitter.emit('message', {
-			stream,
-			box: 'INBOX',
-			sequenceNumber: '123'
+		scannerEmitter.emit('error', {
+			action: 'scanAction',
+			error: 'oh no',
+			box: 'INBOX.stuff'
 		})
 
 		setImmediate(() => {
-			stream.emit('attributes', 'the atts')
-			stream.emit('body', 'the body', 'the info')
-		
-			setImmediate(() => {
-				stream.emit('end')
+			const stream = new EventEmitter()
+			scannerEmitter.emit('message', {
+				stream,
+				box: 'INBOX',
+				sequenceNumber: '123'
+			})
 
+			setImmediate(() => {
+				stream.emit('attributes', 'the atts')
+				stream.emit('body', 'the body', 'the info')
+			
 				setImmediate(() => {
-					scannerEmitter.emit('end')
+					stream.emit('end')
+
+					setImmediate(() => {
+						scannerEmitter.emit('end')
+					})
 				})
 			})
 		})
